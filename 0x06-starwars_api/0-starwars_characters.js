@@ -1,44 +1,23 @@
 #!/usr/bin/node
-/* print characters from the StarWars api */
+// script that prints all characters of a Star War movie
 const request = require('request');
-
-const charSet = new Set();
-const swapi = 'https://swapi-api.alx-tools.com/api/films/' + process.argv[2];
-
-(async () => {
-  try {
-    await new Promise((resolve, reject) => {
-      request(swapi, (error, response, body) => {
-        if (error) {
-          reject(error);
-          return;
-        }
-        body = JSON.parse(body);
-        const characters = body.characters;
-
-        // console.log('statusCode:', response && response.statusCode);
-        // console.log('body:', characters);
-
-        characters.forEach(charUrl => {
-          request(charUrl, (charErr, charResp, charBd) => {
-            if (charErr) {
-              console.error('CharErr:', charErr);
-              return;
-            }
-            const charBody = JSON.parse(charBd);
-            // console.log(charBody.name);
-            charSet.add(charBody.name);
-            if (charSet.size === characters.length) {
-              const people = Array.from(charSet);
-              people.forEach(name => {
-                console.log(name);
-              });
-            }
-          });
-        });
-      });
-    });
-  } catch (error) {
-    console.error('Error:', error);
+const apiUrl = 'https://swapi-api.alx-tools.com/api/films/';
+request.get(apiUrl + process.argv[2], function (err, response, body) {
+  if (err) {
+    console.log(err);
   }
-})();
+  const artists = JSON.parse(body).characters;
+  displayArtists(artists, 0);
+});
+
+function displayArtists (artists, index) {
+  request.get(artists[index], function (err, response, body) {
+    if (!err) {
+      const jsonResp = JSON.parse(body);
+      console.log(jsonResp.name);
+      if (index + 1 < artists.length) {
+        displayArtists(artists, index + 1);
+      }
+    }
+  });
+}
